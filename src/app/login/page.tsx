@@ -3,6 +3,8 @@ import { Input } from "../../components/ui/input";
 //import { Button, type ButtonProps } from "../components/ui/button";
 import { useForm, SubmitHandler } from "react-hook-form";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 // import { useNavigate } from "react-router-dom";
 // import { useContext } from "react";
 // import { AuthContext } from "../provider/authProvider";
@@ -16,7 +18,11 @@ type Inputs = {
 //let userloggedContext = ""
 
 const Login = () => {
+  const router = useRouter()
   const { register, handleSubmit } = useForm<Inputs>();
+  const [isForgetClicked, setIsForgetClicked] = useState<boolean>(false);
+
+
   // const navigate = useNavigate();
   // const {setCurrentUser} = useContext(AuthContext)
   //setCurrentUser(false)
@@ -25,7 +31,7 @@ const Login = () => {
     console.log(data);
 
     const jsonData = JSON.stringify(data);
-    const url = "http://localhost:8000/api/v1/users/login";
+    const url = "/api/auth/login";
 
     axios
       .post(url, jsonData, {
@@ -39,16 +45,18 @@ const Login = () => {
         const responseData = response.data;
         
         if (
-          responseData.statusCode == 200 &&
-          (responseData.data.hasOwnProperty("access_token") ||
-            responseData.data.hasOwnProperty("refreshToken"))
+          response.status === 200 
+          //&&
+          // (responseData.data.hasOwnProperty("access_token") ||
+          //   responseData.data.hasOwnProperty("refreshToken"))
         ) {
-        
+          console.log("here")
+         
           // setCurrentUser((prev:any) => !prev);
          
-          const accessToken = responseData.data.access_token;
-          const refreshToken = responseData.data.refresh_token;
-          // navigate("/home", { state: { accessToken, refreshToken } }); // Use useNavigate and state for tokens
+          // const accessToken = responseData.data.access_token;
+          // const refreshToken = responseData.data.refresh_token;
+          router.push('/'); // Use useNavigate and state for tokens
         } else {
           throw new Error("Missing access or refresh token in response");
         }
@@ -72,6 +80,13 @@ const Login = () => {
         }
       });
   };
+
+  function handleForgetPassword() {
+    setIsForgetClicked(!isForgetClicked);
+    if(isForgetClicked){
+      router.push('/forget');
+    }
+  }
 
     return (
    
@@ -130,6 +145,7 @@ const Login = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <a
+                    onClick={handleForgetPassword}
                     href="#"
                     className="text-sm font-medium text-gray-900 hover:underline dark:text-primary-500"
                   >

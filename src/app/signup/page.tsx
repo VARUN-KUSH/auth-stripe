@@ -16,7 +16,7 @@ const Signup = () => {
     console.log(data);
 
     const jsonData = JSON.stringify(data);
-    const url = "http://localhost:8000/api/v1/users/register";
+    const url = "/api/auth/signup";
 
     axios
       .post<any>(url, jsonData, {
@@ -54,7 +54,7 @@ const Signup = () => {
   };
 
   return (
-    <section className="bg-gray-50 md:h-screen dark:bg-gray-900">
+    <section className="bg-gray-50 md:h-screen dark:bg-gray-900 pt-20">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto lg:py-0">
         {/* <a
           href="#"
