@@ -39,6 +39,7 @@ const Login = () => {
           "Content-Type": "application/json",
         },
       })
+      //eslint-disable-next-line
       .then((response: any) => {
         console.log(response);
         console.log(response.data.statusCode);
@@ -52,11 +53,11 @@ const Login = () => {
         ) {
           console.log("here")
          
-          // setCurrentUser((prev:any) => !prev);
-         
+          // setCurrentUser((prev:any) => !prev); 
+          document.cookie = `token=${responseData.token}; Path=/; HttpOnly; SameSite=Strict`;
           // const accessToken = responseData.data.access_token;
           // const refreshToken = responseData.data.refresh_token;
-          router.push('/'); // Use useNavigate and state for tokens
+          router.push('/dashboard'); // Use useNavigate and state for tokens
         } else {
           throw new Error("Missing access or refresh token in response");
         }

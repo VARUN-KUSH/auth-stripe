@@ -1,7 +1,7 @@
 import User from '@/model/models/users';
 import bcrypt from 'bcrypt';
 import { NextResponse } from 'next/server';
-
+//eslint-disable-next-line
 export async function POST(req:Request):Promise<any> {
     try {
         const reqBody = await req.json();
@@ -31,7 +31,9 @@ export async function POST(req:Request):Promise<any> {
         data: null,
       });
 
-  } catch (err:any) {
+  } 
+  //eslint-disable-next-line
+  catch (err:any) {
     console.error("Error while reseting password:", err);
     return NextResponse.json({
       status: 500,

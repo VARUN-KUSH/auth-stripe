@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 import User from "@/model/models/users";
 import { connectToDatabase } from "@/model/dbconnection";
-
+//eslint-disable-next-line
 export async function POST(req: Request): Promise<any>  {
     console.log("here hello");
   try {
@@ -53,7 +53,9 @@ export async function POST(req: Request): Promise<any>  {
       message: "Password reset link sent to your email.",
       data: null,
     });
-  } catch (err:any) {
+  } 
+  //eslint-disable-next-line
+  catch (err:any) {
     console.error("Error generating reset token:", err);
     return NextResponse.json({
       status: 500,

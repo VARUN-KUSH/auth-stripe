@@ -11,7 +11,7 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-
+//eslint-disable-next-line
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
@@ -20,7 +20,7 @@ const ResetPassword = () => {
         return;
       }
       const url = "/api/auth/forget";
-      let reqdata = JSON.stringify({ token, password });
+      const reqdata = JSON.stringify({ token, password });
       const response = await axios.post(url, reqdata, {
         headers: {
           "Content-Type": "application/json",
@@ -32,7 +32,9 @@ const ResetPassword = () => {
       } else {
         setErrorMessage(data.message || "Something went wrong.");
       }
-    } catch (error: any) {
+    } 
+    //eslint-disable-next-line
+    catch (error: any) {
       if (error.response) {
         // Handle API error response
         console.error("API request error:", error.response.data);

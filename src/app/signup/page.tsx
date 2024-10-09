@@ -1,17 +1,17 @@
 'use client';
 
 import { Input } from "../../components/ui/input";
-import { useContext } from "react";
 // import { AuthContext } from "../provider/authProvider";
 // import Googlelogin from "./Googlelogin";
 import { useForm, SubmitHandler } from "react-hook-form";
 import axios from "axios";
 
 const Signup = () => {
+  //eslint-disable-next-line
   const { register, handleSubmit } = useForm<any>();
   
   // const { setCurrentUser } = useContext(AuthContext);
-
+//eslint-disable-next-line
   const onSubmit: SubmitHandler<any> = (data) => {
     console.log(data);
 
@@ -19,11 +19,13 @@ const Signup = () => {
     const url = "/api/auth/signup";
 
     axios
+    //eslint-disable-next-line
       .post<any>(url, jsonData, {
         headers: {
           "Content-Type": "application/json",
         },
       })
+      //eslint-disable-next-line
       .then((response: any) => {
         console.log(response.data);
         console.log(response.data.statusCode);

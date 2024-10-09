@@ -8,7 +8,7 @@ const Forget = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-
+//eslint-disable-next-line
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     
@@ -29,7 +29,9 @@ const Forget = () => {
       } else {
         setErrorMessage(data.message || "Something went wrong.");
       }
-    } catch (error: any) {
+    } 
+    //eslint-disable-next-line
+    catch (error: any) {
       if (error.response) {
         // Handle API error response
         console.error("API request error:", error.response.data);
