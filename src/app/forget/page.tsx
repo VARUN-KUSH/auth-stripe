@@ -1,46 +1,53 @@
-"use client";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+// src/app/forget.tsx
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
 
-const Forget = () => {
+const ForgetPassword = () => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-//eslint-disable-next-line
-  const handleSubmit = async (e: any) => {
+  const [email, setEmail] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setMessage('');
+    setErrorMessage('');
+
+    if (!email) {
+      setErrorMessage('Please enter your email.');
+      return;
+    }
+
+    setLoading(true);
     try {
-      const url = "/api/auth/forget";
-      const response = await axios.post(url, { email }, {
+      const response = await fetch('/api/auth/forget', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ email }),
       });
 
-      const data = response.data;
-
+      const data = await response.json();
       if (response.status === 200) {
-        setMessage(data.message || "Reset link sent to your email.");
-        setErrorMessage(""); // Clear any previous error message
-        router.push("/login");
+        setMessage(data.message || 'Reset link sent to your email.');
+        setErrorMessage('');
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000); // Redirect after 2 seconds
       } else {
-        setErrorMessage(data.message || "Something went wrong.");
+        setErrorMessage(data.message || 'Failed to send reset link.');
       }
     } 
     //eslint-disable-next-line
     catch (error: any) {
-      if (error.response) {
-        // Handle API error response
-        console.error("API request error:", error.response.data);
-        setErrorMessage(`API request failed: ${error.response.data.message || 'An error occurred'}`);
-      } else {
-        // Handle unexpected errors
-        console.error("Error preparing request:", error.message);
-        setErrorMessage("An unexpected error occurred. Please try again later.");
-      }
+      console.error('Forget password error:', error);
+      setErrorMessage('An unexpected error occurred. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,19 +56,25 @@ const Forget = () => {
       <div className="bg-white shadow-md rounded-lg p-8 max-w-sm w-full">
         <h1 className="text-2xl font-bold mb-6 text-center">Forgot Password</h1>
         <form onSubmit={handleSubmit}>
-          <input
+          <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Enter your email
+          </label>
+          <Input
+            id="email"
             type="email"
+            placeholder="name@company.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
             required
             className="border border-gray-300 rounded-md p-2 w-full mb-4"
           />
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white rounded-md p-2 hover:bg-blue-600 transition duration-200"
+            disabled={loading}
+            className={`w-full text-white bg-black hover:bg-neutral-950 rounded-md p-2 hover:bg-blue-600 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
           >
-            Send Reset Link
+            {loading ? 'Sending...' : 'Send Reset Link'}
           </button>
         </form>
         {message && <p className="text-green-600 mt-4">{message}</p>}
@@ -71,4 +84,4 @@ const Forget = () => {
   );
 };
 
-export default Forget;
+export default ForgetPassword;

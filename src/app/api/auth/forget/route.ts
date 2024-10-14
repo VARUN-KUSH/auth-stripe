@@ -1,66 +1,70 @@
-import { v4 as uuidv4 } from "uuid";
-import nodemailer from "nodemailer";
-import { NextResponse } from "next/server";
-import User from "@/model/models/users";
-import { connectToDatabase } from "@/model/dbconnection";
-//eslint-disable-next-line
-export async function POST(req: Request): Promise<any>  {
-    console.log("here hello");
+// src/app/api/auth/forget.ts
+import { NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
+import nodemailer from 'nodemailer';
+import { connectToDatabase } from '@/model/dbconnection';
+import User from '@/model/models/users';
+
+export async function POST(req: Request): Promise<NextResponse> {
   try {
-    const reqBody = await req.json();
-    const { email } = reqBody; // Correctly destructure the email from the body
+    const { email } = await req.json();
+
+    // Connect to the database
     await connectToDatabase();
+
     // Find the user by email
     const user = await User.findOne({ email });
     if (!user) {
-      return NextResponse.json({ status: 404, message: "User not found." });
+      return NextResponse.json({
+        status: 404,
+        message: 'User not found.',
+      }, { status: 404 });
     }
 
-    // Generate reset token and set expiration
+    // Generate reset token and set expiration (1 hour)
     const resetToken = uuidv4();
-    const expirationTime = Date.now() + 3600000; // 1 hour from now
+    const resetTokenExpiry = Date.now() + 3600000; // 1 hour in ms
 
-    // Update the user with the reset token and expiration time
+    // Update the user with the reset token and expiry
     user.resetToken = resetToken;
-    user.resetTokenExpiration = expirationTime;
+    user.resetTokenExpiration = resetTokenExpiry;
     await user.save();
 
-    // Create a transporter to send email via Ethereal
+    // Create a transporter using Ethereal for testing or use your SMTP service
     const transporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      secure: false, // use TLS
+      host: 'smtp.ethereal.email', // Replace with your SMTP host
+      port: 587, // Replace with your SMTP port
+      secure: false, // true for 465, false for other ports
       auth: {
-        user: "gabriella91@ethereal.email", // Ethereal email user
-        pass: "RCWcepV1XFhTJdKrVf",         // Ethereal email password
+        user: "randy53@ethereal.email", // Ethereal email user
+        pass: "9w3nzG3PsgP6RpANdr",         // Ethereal email password
       },
     });
 
     // Generate the reset link
     const resetLink = `${process.env.NEXTAUTH_URL}/reset?token=${resetToken}`;
+
     // Send the reset email
     await transporter.sendMail({
-      from: "gabriella91@ethereal.email", // Ensure this is a valid email
+      from: "randy53@ethereal.email", // Ensure this is a valid email
       to: email,
-      subject: "Password Reset",
+      subject: 'Password Reset',
       text: `Please click the following link to reset your password: ${resetLink}`,
-      html: `<p>Please click the following link to reset your password: <a href="${resetLink}">${resetLink}</a></p>`,
+      html: `<p>Please click the following link to reset your password:</p><a href="${resetLink}">${resetLink}</a>`,
     });
 
-    // Return a success response
     return NextResponse.json({
-      status: 200, // Corrected status code
-      message: "Password reset link sent to your email.",
-      data: null,
-    });
+      status: 200,
+      message: 'Password reset link sent to your email.',
+    }, { status: 200 });
   } 
-  //eslint-disable-next-line
-  catch (err:any) {
-    console.error("Error generating reset token:", err);
+   //eslint-disable-next-line
+  catch (err: any) {
+    console.error('Error generating reset token:', err);
     return NextResponse.json({
       status: 500,
-      message: "An error occurred while processing your request.",
+      message: 'An error occurred while processing your request.',
       error: err.message,
-    });
+    }, { status: 500 });
   }
 }

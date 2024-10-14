@@ -1,179 +1,99 @@
-'use client'
-import { Input } from "../../components/ui/input";
-//import { Button, type ButtonProps } from "../components/ui/button";
-import { useForm, SubmitHandler } from "react-hook-form";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { useContext } from "react";
-// import { AuthContext } from "../provider/authProvider";
-// import Googlelogin from "./Googlelogin";
-
-type Inputs = {
-  email: string;
-  password: string;
-};
-
-//let userloggedContext = ""
+// src/app/login.tsx
+'use client';
+import { useContext, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import AuthContext from '@/context/AuthContext';
+import { Input } from '@/components/ui/input';
 
 const Login = () => {
-  const router = useRouter()
-  const { register, handleSubmit } = useForm<Inputs>();
-  const [isForgetClicked, setIsForgetClicked] = useState<boolean>(false);
+  const router = useRouter();
+  const { login } = useContext(AuthContext);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
-
-  // const navigate = useNavigate();
-  // const {setCurrentUser} = useContext(AuthContext)
-  //setCurrentUser(false)
-  
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log(data);
-
-    const jsonData = JSON.stringify(data);
-    const url = "/api/auth/login";
-
-    axios
-      .post(url, jsonData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      //eslint-disable-next-line
-      .then((response: any) => {
-        console.log(response);
-        console.log(response.data.statusCode);
-        const responseData = response.data;
-        
-        if (
-          response.status === 200 
-          //&&
-          // (responseData.data.hasOwnProperty("access_token") ||
-          //   responseData.data.hasOwnProperty("refreshToken"))
-        ) {
-          console.log("here")
-         
-          // setCurrentUser((prev:any) => !prev); 
-          document.cookie = `token=${responseData.token}; Path=/; HttpOnly; SameSite=Strict`;
-          // const accessToken = responseData.data.access_token;
-          // const refreshToken = responseData.data.refresh_token;
-          router.push('/dashboard'); // Use useNavigate and state for tokens
-        } else {
-          throw new Error("Missing access or refresh token in response");
-        }
-      })
-      .catch((error) => {
-        // Handle various error scenarios
-        if (error.response) {
-          // Request made and server responded with a status code that falls out of the range of 2xx
-          console.error("API request error:", error.response.data);
-          alert(`API request failed with status: ${error.response.status}`);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.error("Network error:", error.request);
-          alert(
-            "An error occurred while communicating with the server. Please check your network connection and try again."
-          );
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.error("Error preparing request:", error.message);
-          //alert("An unexpected error occurred. Please try again later.");
-        }
-      });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setLoading(true);
+    try {
+      const success = await login(email, password);
+      if (success) {
+        router.push('/dashboard');
+      } else {
+        setErrorMessage('Invalid email or password.');
+      }
+    } 
+    //eslint-disable-next-line
+    catch (error: any) {
+      console.error('Login error:', error);
+      setErrorMessage('An unexpected error occurred. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  function handleForgetPassword() {
-    setIsForgetClicked(!isForgetClicked);
-    if(isForgetClicked){
-      router.push('/forget');
-    }
-  }
-
-    return (
-   
-      <section className="bg-gray-50 dark:bg-gray-900">
-        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-          {/* <a
-            href="#"
-            className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white"
-          >
-            <img
-              className="w-8 h-8 mr-2"
-              src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg"
-              alt="logo"
-            />
-
-            Map's Scrapper
-            
-          </a> */}
-          <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
-            <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-              <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-                Sign in to your account
-              </h1>
-              
-              {/* <Googlelogin value="Sign in"/> */}
-              
-              <form
-                className="space-y-4 md:space-y-6"
-                onSubmit={handleSubmit(onSubmit)}
-              >
-                <div>
-                <label
-                  htmlFor="email"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >
+  return (
+    <section className="bg-gray-50 dark:bg-gray-900">
+      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+        <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+          <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
+            <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+              Sign in to your account
+            </h1>
+            <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Your email
                 </label>
-                  <Input
-                    id="name"
-                    placeholder="name@company.com"
-                    {...register("email", { required: true })}
-                  />
-                </div>
-                <div>
-                <label
-                  htmlFor="password"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Password
                 </label>
-                  <Input
-                    id="pass"
-                    placeholder="........"
-                    {...register("password", { required: true })}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <a
-                    onClick={handleForgetPassword}
-                    href="#"
-                    className="text-sm font-medium text-gray-900 hover:underline dark:text-primary-500"
-                  >
-                    Forgot password?
-                  </a>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full text-white bg-black hover:bg-neutral-950 focus:ring-4 focus:outline-none focus:ring-neutral-950 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                >
-                  Sign in
-                </button>
-                <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                  Don’t have an account yet?{" "}
-                  <a
-                    href="/signup"
-                    className="font-medium text-primary-600 hover:underline dark:text-primary-500"
-                  >
-                    Sign up
-                  </a>
-                </p>
-              </form>
-            </div>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="********"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <a href="/forget" className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">
+                  Forgot password?
+                </a>
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full text-white bg-black hover:bg-neutral-950 focus:ring-4 focus:outline-none focus:ring-neutral-950 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 ${loading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+              >
+                {loading ? 'Signing in...' : 'Sign in'}
+              </button>
+              <p className="text-sm font-light text-gray-500 dark:text-gray-400">
+                Don’t have an account yet?{' '}
+                <a href="/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500">
+                  Sign up
+                </a>
+              </p>
+              {errorMessage && <p className="text-red-600 mt-4">{errorMessage}</p>}
+            </form>
           </div>
         </div>
-      </section>
-    
+      </div>
+    </section>
   );
 };
 

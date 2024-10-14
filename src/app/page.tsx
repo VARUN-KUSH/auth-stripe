@@ -1,19 +1,15 @@
-'use client'
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
+"use client";
+import AuthContext from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useContext } from "react";
 
-
-const page = () => {
-    const { user } = useAuth();
-    const router = useRouter();
-    if(!user){
-        router.push('/login')
-    }
-   else{
-    router.push('/dashboard' )
-   }
-    return(
-        <> </>
-    )
+export default function Home() {
+  const { user } = useContext(AuthContext);
+  const router = useRouter();
+  console.log(user);
+  if (user===null) {
+    router.push("/login");
+  } else{
+    router.push("/dashboard");
+  }
 }
-export default page

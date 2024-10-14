@@ -1,47 +1,54 @@
-// middleware.js
+// src/middleware.ts
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
-//eslint-disable-next-line
-export function middleware(request: any) {
+
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Define public routes
-  const publicRoutes = [
+  // Define public paths that do not require authentication
+  const publicPaths = [
     '/login',
     '/signup',
     '/forget',
     '/reset',
-    '/api/auth/login',
-    '/api/auth/signup',
+    '/cancel',
+    '/success',
+    '/favicon.ico',
     '/api/auth/forget',
     '/api/auth/reset',
-    '/api/auth/currentUser',
-    '/api/auth/logout',
+    '/api/auth/login',
+    '/api/auth/signup',
+    '/api/stripe/webhook', // Webhook should be accessible without auth
   ];
 
-  // Allow public routes without authentication
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
+  // Allow requests for public paths
+  if (publicPaths.some((path) => pathname.startsWith(path))) {
     return NextResponse.next();
   }
 
-  // Get the JWT from cookies
+  // Get token from cookies
   const token = request.cookies.get('token')?.value;
 
   if (!token) {
     // Redirect to login if no token is present
     const url = request.nextUrl.clone();
-    url.pathname = url.push('/login');
+    url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
   try {
-    if (!process.env.NEXTAUTH_SECRET) {
-      throw new Error("JWT_SECRET environment variable is not defined.");
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined in environment variables');
     }
-    // Verify the token
-    jwt.verify(token, process.env.NEXTAUTH_SECRET);
+
+    // Verify token
+    jwt.verify(token, process.env.JWT_SECRET);
+
+    // Continue with the request if token is valid
     return NextResponse.next();
-  } catch (err) {
+  } catch (error) {
+    console.error('Invalid token:', error);
     // Redirect to login if token is invalid or expired
     const url = request.nextUrl.clone();
     url.pathname = '/login';
@@ -49,8 +56,7 @@ export function middleware(request: any) {
   }
 }
 
+// Specify the paths you want the middleware to run on
 export const config = {
-  matcher: [
-    '/((?!api/auth/login|api/auth/signup|api/auth/forget|api/auth/reset|api/auth/currentUser|api/auth/logout|login|signup|forget|reset).*)',
-  ],
+  matcher: ['/((?!api/auth/forget|api/auth/reset|api/auth/login|api/auth/signup|api/stripe/webhook|_next/static|favicon.ico).*)'],
 };
